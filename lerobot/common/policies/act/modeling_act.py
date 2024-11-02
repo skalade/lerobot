@@ -399,11 +399,11 @@ class ACT(nn.Module):
                 "action" in batch
             ), "actions must be provided when using the variational objective in training mode."
 
-        batch_size = (
+        batch_size = len(
             batch["observation.images"]
             if "observation.images" in batch
-            else batch["observation.environment_state"]
-        ).shape[0]
+            else batch["observation.state"]
+        )
 
         # Prepare the latent for input to the transformer encoder.
         if self.config.use_vae and "action" in batch:
@@ -456,7 +456,7 @@ class ACT(nn.Module):
             mu = log_sigma_x2 = None
             # TODO(rcadene, alexander-soare): remove call to `.to` to speedup forward ; precompute and use buffer
             latent_sample = torch.zeros([batch_size, self.config.latent_dim], dtype=torch.float32).to(
-                batch["observation.state"].device
+                batch["observation.state"][0].device
             )
 
         # Prepare transformer encoder inputs.
